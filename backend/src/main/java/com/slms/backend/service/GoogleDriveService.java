@@ -32,8 +32,14 @@ public class GoogleDriveService {
     private Drive driveService;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         try {
+            java.io.File keyFile = new java.io.File(credentialsPath);
+            if (!keyFile.exists()) {
+                System.out.println("⚠️ Google Drive Key (gcp-key.json) NOT FOUND at " + credentialsPath + ". Drive features disabled.");
+                return;
+            }
+
             GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(credentialsPath))
                     .createScoped(Collections.singleton(DriveScopes.DRIVE_FILE));
 
@@ -43,8 +49,9 @@ public class GoogleDriveService {
                     new HttpCredentialsAdapter(credentials))
                     .setApplicationName("SLMS-Logistics")
                     .build();
-        } catch (IOException e) {
-            System.err.println("Google Drive Configuration Failed: " + e.getMessage());
+            System.out.println("✅ Google Drive 5TB Asset Pipeline INITIALIZED.");
+        } catch (Exception e) {
+            System.err.println("❌ Google Drive Failover: " + e.getMessage());
         }
     }
 
