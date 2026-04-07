@@ -12,13 +12,14 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
 
-# 🚀 React Frontend (Static Site)
-staticSites:
-  - name: slms-frontend
+  # 🚀 React Frontend (Static)
+  - type: web
+    name: slms-frontend
+    env: static
     plan: free
     region: oregon
     buildCommand: "cd frontend && npm install && npm run build"
-    publishPath: frontend/dist
+    staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
         fromService:
