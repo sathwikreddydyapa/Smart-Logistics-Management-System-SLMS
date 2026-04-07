@@ -13,7 +13,7 @@ services:
         value: prod
 
   # 🚀 React Frontend (Static Site)
-  - type: static
+  - type: static_site
     name: slms-frontend
     env: node
     plan: free
