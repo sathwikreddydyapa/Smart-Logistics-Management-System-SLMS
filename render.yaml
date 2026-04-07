@@ -4,7 +4,7 @@ services:
     name: slms-backend
     env: docker
     dockerContext: backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: backend/Dockerfile
     plan: free
     region: oregon
     healthCheckPath: /api/shipments/all
