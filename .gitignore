@@ -1,0 +1,29 @@
+# Built files
+node_modules/
+dist/
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Environment / Secret
+.env
+.env.local
+.env.*.local
+application.properties
+application.yml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.DS_Store
+
+# Log files
+*.log
+
+# Misc
+.gemini/
+/tmp/
