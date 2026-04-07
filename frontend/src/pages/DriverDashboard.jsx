@@ -43,6 +43,32 @@ export const DriverDashboard = () => {
     }
   };
 
+  const handleFileUpload = async (shipmentId, file) => {
+    if (!file) return;
+    const tId = toast.loading(`Uploading proof for #${shipmentId} to 5TB Drive...`);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/files/upload-proof/${shipmentId}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Proof synced to Google One!", { id: tId });
+        fetchData();
+      } else {
+        throw new Error(data.message || 'Upload failed');
+      }
+    } catch {
+      toast.error("Cloud sync failed. Check Render secrets.", { id: tId });
+    }
+  };
+
   const stats = {
     total: shipments.length,
     active: shipments.filter(s => s.status === 'Picked Up' || s.status === 'In Transit').length,
@@ -146,20 +172,41 @@ export const DriverDashboard = () => {
                       <td style={{ fontSize: '14px' }}>{s.package_details}</td>
                       <td>{getStatusBadge(s.status)}</td>
                       <td>
-                        <select 
-                          value={s.status} 
-                          onChange={(e) => handleStatusChange(s.id, e.target.value)}
-                          disabled={s.status === 'Delivered'}
-                          style={{
-                             background: s.status === 'Delivered' ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.3)',
-                             opacity: s.status === 'Delivered' ? 0.5 : 1
-                          }}
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Picked Up">Picked Up</option>
-                          <option value="In Transit">In Transit</option>
-                          <option value="Delivered">Delivered</option>
-                        </select>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <select 
+                            value={s.status} 
+                            onChange={(e) => handleStatusChange(s.id, e.target.value)}
+                            disabled={s.status === 'Delivered'}
+                            style={{
+                               background: s.status === 'Delivered' ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.3)',
+                               opacity: s.status === 'Delivered' ? 0.5 : 1
+                            }}
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Picked Up">Picked Up</option>
+                            <option value="In Transit">In Transit</option>
+                            <option value="Delivered">Delivered</option>
+                          </select>
+                          
+                          {s.status !== 'Delivered' && (
+                            <>
+                              <input 
+                                type="file" 
+                                id={`file-${s.id}`} 
+                                style={{ display: 'none' }} 
+                                onChange={(e) => handleFileUpload(s.id, e.target.files[0])}
+                                accept="image/*,.pdf"
+                              />
+                              <button 
+                                className="btn-primary" 
+                                onClick={() => document.getElementById(`file-${s.id}`).click()}
+                                style={{ padding: '6px 12px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                              >
+                                {s.packageDetails && s.packageDetails.includes('Proof:') ? 'Update Proof' : 'Upload Proof'}
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
