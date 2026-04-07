@@ -1,16 +1,46 @@
-# React + Vite
+# Smart Logistics Management System (SLMS) - Startup Edition 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-performance, futuristic SaaS platform for intelligent logistics and supply chain management. Built with a Glassmorphism UI and a robust Spring Boot backend.
 
-Currently, two official plugins are available:
+## ✨ Core Features
+- **Smart Tracking**: Live shipment timeline and progress visualization.
+- **Dynamic Pricing Engine**: Automated delivery cost calculation based on distance/package simulation.
+- **Estimated Delivery Time (ETA)**: Predictive arrival windows for every shipment.
+- **Driver Earnings & Wallet**: Automated payout system (80/20 split) triggered upon successful delivery.
+- **Business Analytics**: Admin-level Gross Revenue, Driver Payouts, and Operational Status distribution charts.
+- **Role-Based Dashboards**: Personalized experiences for Admins, Drivers, and Customers.
+- **Advanced Profile Management**: Full visibility into personal details with startup-grade security.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠️ Technology Stack
+- **Frontend**: React.js (Vite), Lucide Icons, Recharts (Analytics), Glassmorphism UI.
+- **Backend**: Java Spring Boot 3.4.3, Spring Security (JWT), H2 Database.
+- **DevOps**: GitHub CLI, Git Version Control.
 
-## React Compiler
+## 🚀 Quick Start (Local Development)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Prerequisites
+- Java 17+
+- Node.js 18+
+- Maven (included as `mvnw`)
 
-## Expanding the ESLint configuration
+### 2. Backend Setup
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+*API running at `http://localhost:8080`*
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*UI running at `http://localhost:5173`*
+
+## 📦 Deployment & GitHub
+The repository is fully initialized and can be accessed at:
+[https://github.com/sathwikreddydyapa/Smart-Logistics-Management-System-SLMS](https://github.com/sathwikreddydyapa/Smart-Logistics-Management-System-SLMS)
+
+---
+*Created with ❤️ by Musephic (Agentic AI Assistant)*
