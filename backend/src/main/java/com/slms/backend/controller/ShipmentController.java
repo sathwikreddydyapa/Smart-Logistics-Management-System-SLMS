@@ -96,4 +96,25 @@ public class ShipmentController {
     public ResponseEntity<?> getAllDrivers() {
         return ResponseEntity.ok(userRepository.findByRole("driver"));
     }
+
+    @GetMapping("/recommend-driver/{id}")
+    public ResponseEntity<?> recommendDriver(@PathVariable String id) {
+        java.util.List<com.slms.backend.entity.User> drivers = userRepository.findByRole("driver");
+        com.slms.backend.entity.User recommended = null;
+        long minWorkload = Long.MAX_VALUE;
+
+        for (com.slms.backend.entity.User driver : drivers) {
+            long workload = shipmentRepository.findByAssignedDriverId(driver.getId())
+                    .stream()
+                    .filter(s -> !"Delivered".equals(s.getStatus()) && !"Cancelled".equals(s.getStatus()))
+                    .count();
+            
+            if (workload < minWorkload) {
+                minWorkload = workload;
+                recommended = driver;
+            }
+        }
+
+        return recommended != null ? ResponseEntity.ok(recommended) : ResponseEntity.notFound().build();
+    }
 }

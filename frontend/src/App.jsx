@@ -14,10 +14,20 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
 import { Profile } from './pages/Profile';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <Toaster position="top-right" toastOptions={{
+           style: {
+             background: 'rgba(20, 20, 25, 0.9)',
+             color: '#fff',
+             border: '1px solid var(--border-color)',
+             backdropFilter: 'blur(10px)'
+           }
+        }} />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />

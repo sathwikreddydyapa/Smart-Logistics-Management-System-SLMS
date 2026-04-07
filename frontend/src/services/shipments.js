@@ -17,7 +17,7 @@ export const getShipmentById = async (id) => {
   try {
     const res = await api.get(`/shipments/track/${id}`);
     return res.data;
-  } catch (err) {
+  } catch {
     throw new Error('Shipment not found');
   }
 };
@@ -40,5 +40,10 @@ export const assignDriver = async (id, driver_id) => {
 
 export const getAllDrivers = async () => {
   const res = await api.get('/shipments/drivers');
+  return res.data;
+};
+
+export const recommendDriver = async (shipmentId) => {
+  const res = await api.get(`/shipments/recommend-driver/${shipmentId}`);
   return res.data;
 };

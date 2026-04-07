@@ -42,7 +42,7 @@ export const LiveTracking = () => {
           targetLng: 78 + (Math.random() * 8 - 4)
         }));
         setVehicles(simulatedVehicles);
-      } catch (err) {
+      } catch {
         console.error("Failed to fetch shipments for tracking");
       }
     };
@@ -56,16 +56,27 @@ export const LiveTracking = () => {
         if (v.status === 'Delivered') return v; // Keep delivered static
         
         // Move slowly towards target
-        const latStep = (v.targetLat - v.lat) * 0.05;
-        const lngStep = (v.targetLng - v.lng) * 0.05;
+        const dx = v.targetLat - v.lat;
+        const dy = v.targetLng - v.lng;
+        const distance = Math.sqrt(dx*dx + dy*dy);
         
+        // If reached target, get new target
+        if (distance < 0.01) {
+          return {
+            ...v,
+            targetLat: 20 + (Math.random() * 8 - 4),
+            targetLng: 78 + (Math.random() * 8 - 4)
+          };
+        }
+        
+        const speed = 0.005; // Adjust for smoothness
         return {
           ...v,
-          lat: v.lat + latStep,
-          lng: v.lng + lngStep
+          lat: v.lat + (dx / distance) * speed,
+          lng: v.lng + (dy / distance) * speed
         };
       }));
-    }, 2000); // update every 2s
+    }, 100); // 100ms for high-frequency smooth motion
 
     return () => clearInterval(interval);
   }, []);

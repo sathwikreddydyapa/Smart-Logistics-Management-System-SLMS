@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { Topbar } from '../components/Topbar';
-import { getShipments, getAllDrivers, assignDriver } from '../services/shipments';
-import { Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import { getShipments, getAllDrivers, assignDriver, recommendDriver } from '../services/shipments';
+import { Package, Truck, CheckCircle, Clock, Sparkles } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import toast from 'react-hot-toast';
 
 export const AdminDashboard = () => {
   const [shipments, setShipments] = useState([]);
@@ -15,10 +16,15 @@ export const AdminDashboard = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [sData, dData] = await Promise.all([getShipments(), getAllDrivers()]);
-    setShipments(sData);
-    setDrivers(dData);
-    setLoading(false);
+    try {
+      const [sData, dData] = await Promise.all([getShipments(), getAllDrivers()]);
+      setShipments(sData);
+      setDrivers(dData);
+    } catch {
+      toast.error("Global network sync failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -27,8 +33,27 @@ export const AdminDashboard = () => {
 
   const handleAssignDriver = async (shipmentId, driverId) => {
     if (!driverId) return;
-    await assignDriver(shipmentId, driverId);
-    fetchData();
+    const tId = toast.loading("Finalizing assignment...");
+    try {
+       await assignDriver(shipmentId, driverId);
+       fetchData();
+       toast.success("Driver assigned and notified!", { id: tId });
+    } catch {
+       toast.error("Assignment denied. Fleet offline.", { id: tId });
+    }
+  };
+
+  const handleSuggestDriver = async (shipmentId) => {
+    const tId = toast.loading("AI Analyzing fleet availability...");
+    try {
+      const recommended = await recommendDriver(shipmentId);
+      if (recommended) {
+        toast.success(`Optimal Driver: ${recommended.name}`, { id: tId });
+        await handleAssignDriver(shipmentId, recommended.id);
+      }
+    } catch {
+      toast.error("AI Insights currently unavailable", { id: tId });
+    }
   };
 
   const stats = {
@@ -245,16 +270,39 @@ export const AdminDashboard = () => {
                       </td>
                       <td>{getStatusBadge(s.status)}</td>
                       <td>
-                        <select 
-                          value={s.assigned_driver_id || ''} 
-                          onChange={(e) => handleAssignDriver(s.id, e.target.value)}
-                          disabled={s.status === 'Delivered'}
-                        >
-                          <option value="">Unassigned</option>
-                          {drivers.map(d => (
-                             <option key={d.id} value={d.id}>{d.name}</option>
-                          ))}
-                        </select>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <select 
+                            value={s.assigned_driver_id || ''} 
+                            onChange={(e) => handleAssignDriver(s.id, e.target.value)}
+                            disabled={s.status === 'Delivered'}
+                            style={{ flex: 1 }}
+                          >
+                            <option value="">Unassigned</option>
+                            {drivers.map(d => (
+                               <option key={d.id} value={d.id}>{d.name}</option>
+                            ))}
+                          </select>
+                          {s.status === 'Pending' && !s.assigned_driver_id && (
+                            <button 
+                              onClick={() => handleSuggestDriver(s.id)}
+                              className="btn-ai-sparkle"
+                              title="Get AI Recommendation"
+                              style={{ 
+                                padding: '8px', 
+                                background: 'linear-gradient(135deg, #7c3aed, #db2777)', 
+                                border: 'none', 
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.3s ease'
+                              }}
+                            >
+                               <Sparkles size={16} color="white" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

@@ -4,6 +4,7 @@ import { Topbar } from '../components/Topbar';
 import { useAuth } from '../contexts/AuthContext';
 import { getShipments, updateShipmentStatus } from '../services/shipments';
 import { Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const DriverDashboard = () => {
   const { user } = useAuth();
@@ -13,9 +14,14 @@ export const DriverDashboard = () => {
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
-    const data = await getShipments({ assigned_driver_id: user.id });
-    setShipments(data);
-    setLoading(false);
+    try {
+      const data = await getShipments({ assigned_driver_id: user.id });
+      setShipments(data);
+    } catch {
+      toast.error("Network sync failed");
+    } finally {
+      setLoading(false);
+    }
   }, [user.id]);
 
   useEffect(() => {
@@ -23,8 +29,18 @@ export const DriverDashboard = () => {
   }, [fetchData]);
 
   const handleStatusChange = async (shipmentId, status) => {
-    await updateShipmentStatus(shipmentId, status);
-    fetchData();
+    const tId = toast.loading(`Updating order #${shipmentId}...`);
+    try {
+      await updateShipmentStatus(shipmentId, status);
+      if (status === 'Delivered') {
+        toast.success("Delivery confirmed! Payout processed to your wallet.", { id: tId, duration: 5000 });
+      } else {
+        toast.success(`Status updated to ${status}`, { id: tId });
+      }
+      fetchData();
+    } catch {
+      toast.error("Failed to update status. Check connection.", { id: tId });
+    }
   };
 
   const stats = {
