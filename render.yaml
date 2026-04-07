@@ -12,10 +12,9 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
 
-  # 🚀 React Frontend (Static Site)
-  - type: static_site
-    name: slms-frontend
-    env: node
+# 🚀 React Frontend (Static Site)
+staticSites:
+  - name: slms-frontend
     plan: free
     region: oregon
     buildCommand: "cd frontend && npm install && npm run build"
