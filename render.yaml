@@ -1,0 +1,28 @@
+services:
+  # ⚙️ Java Spring Boot Backend (Docker)
+  - type: web
+    name: slms-backend
+    env: docker
+    dockerContext: backend
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /api/shipments/all
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+  # 🚀 React Frontend (Static Site)
+  - type: static
+    name: slms-frontend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: "cd frontend && npm install && npm run build"
+    publishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: slms-backend
+          property: host
