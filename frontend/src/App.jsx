@@ -13,6 +13,7 @@ import { CustomerDashboard } from './pages/CustomerDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
 import { Profile } from './pages/Profile';
+import { Analytics } from './pages/Analytics';
 
 import { Toaster } from 'react-hot-toast';
 
@@ -48,6 +49,12 @@ function App() {
           <Route path="/admin" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin/analytics" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <Analytics />
             </ProtectedRoute>
           } />
           
