@@ -50,7 +50,7 @@ export const DriverDashboard = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/files/upload-proof/${shipmentId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/files/upload-proof/${shipmentId}`, {
         method: 'POST',
         body: formData,
         headers: {
