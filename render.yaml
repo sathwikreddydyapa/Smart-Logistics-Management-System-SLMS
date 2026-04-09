@@ -24,4 +24,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://slms-backend.onrender.com
+        fromService:
+          type: web
+          name: slms-backend
+          property: url

@@ -18,13 +18,14 @@ if (!finalBaseURL) {
   }
 }
 
-// Ensure protocol
-if (!finalBaseURL.startsWith('http')) {
+// Ensure protocol and remove trailing slash
+if (finalBaseURL && !finalBaseURL.startsWith('http')) {
   finalBaseURL = `https://${finalBaseURL}`;
 }
 
-// Remove trailing slash if any
-finalBaseURL = finalBaseURL.replace(/\/$/, '');
+if (finalBaseURL) {
+  finalBaseURL = finalBaseURL.replace(/\/$/, '');
+}
 
 const api = axios.create({
   baseURL: finalBaseURL,
