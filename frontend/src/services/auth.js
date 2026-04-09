@@ -5,10 +5,11 @@ export const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     return response.data;
   } catch (error) {
+    console.error("Login API Error:", error.response || error.message);
     if (error.response && error.response.status === 401) {
       throw new Error("Invalid email or password");
     }
-    throw new Error("Authentication error");
+    throw new Error("Authentication error: " + (error.message || "Unknown error"));
   }
 };
 

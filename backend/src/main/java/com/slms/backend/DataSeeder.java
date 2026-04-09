@@ -21,17 +21,26 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepository.count() == 0) {
             System.out.println("Seeding custom requested user...");
 
-            // Custom user requested by Sathwik
-            // Master user: Sathwik
-            User master = new User();
-            master.setName("Sathwik Reddy Dyapa");
-            master.setEmail("sathwikreddydyapa5506@gmail.com");
-            master.setPassword(passwordEncoder.encode("dyapa5506"));
-            master.setRole("admin");
-            master.setPhoneNumber("+91 99999 88888");
-            master.setAddress("Hyderabad, Telangana, India");
-            master.setBio("Chief Operations Officer & Lead Developer of SLMS.");
-            userRepository.save(master);
+            // Admin 1: Sathwik Reddy Dyapa
+            User admin1 = new User();
+            admin1.setName("Sathwik Reddy Dyapa");
+            admin1.setEmail("sathwikreddydyapa5506@gmail.com");
+            admin1.setPassword(passwordEncoder.encode("dyapa5506"));
+            admin1.setRole("admin");
+            admin1.setPhoneNumber("+91 99999 88888");
+            admin1.setAddress("Hyderabad, Telangana, India");
+            admin1.setBio("Chief Operations Officer & Lead Developer of SLMS.");
+            userRepository.save(admin1);
+
+            // Admin 2: Siddhartha Goud Pasham
+            User admin2 = new User();
+            admin2.setName("Siddhartha Goud Pasham");
+            admin2.setEmail("siddharthagoudpasham785@gmail.com");
+            admin2.setPassword(passwordEncoder.encode("Si1711@2007"));
+            admin2.setRole("admin");
+            admin2.setPhoneNumber("+91 88888 99999");
+            admin2.setAddress("Hyderabad, Telangana, India");
+            userRepository.save(admin2);
 
             // Demo Driver
             User driver = new User();
@@ -54,7 +63,7 @@ public class DataSeeder implements CommandLineRunner {
             customer.setAddress("Bangalore, Karnataka");
             userRepository.save(customer);
 
-            System.out.println("Custom user seeded successfully.");
+            System.out.println("Custom admins and demo users seeded successfully.");
         }
     }
 }

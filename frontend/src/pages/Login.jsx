@@ -19,7 +19,9 @@ export const Login = () => {
       else if (user.role === 'driver') navigate('/driver');
       else navigate('/customer');
     } catch (err) {
-      setError(err.message);
+      setError(err.message === 'Authentication error' 
+        ? "Invalid credentials or account does not exist. Please try again or sign up." 
+        : err.message);
     }
   };
 
