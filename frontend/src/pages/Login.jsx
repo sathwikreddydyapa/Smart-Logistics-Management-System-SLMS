@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { login } from '../services/auth';
+import { getBaseURL } from '../services/api';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -49,7 +50,13 @@ export const Login = () => {
           Don't have an account? <Link to="/signup">Sign up</Link>
         </p>
         
-        <div style={{ marginTop: '30px', fontSize: '13px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+        <div style={{ marginTop: '30px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '16px', wordBreak: 'break-all' }}>
+           <p><strong>🛠️ Debug Connection:</strong></p>
+           <p>API Endpoint: <code style={{ color: 'var(--primary)' }}>{getBaseURL()}/auth/login</code></p>
+           <p>Build Time: {new Date().toLocaleString()}</p>
+        </div>
+
+        <div style={{ marginTop: '20px', fontSize: '13px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
            <p><strong>Demo Users (Password: password):</strong></p>
            <p>admin@test.com</p>
            <p>driver@test.com</p>

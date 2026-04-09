@@ -44,4 +44,6 @@ api.interceptors.request.use(
   }
 );
 
+export const getBaseURL = () => api.defaults.baseURL;
+
 export default api;
