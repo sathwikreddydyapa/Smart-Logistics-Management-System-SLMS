@@ -2,20 +2,20 @@ import axios from 'axios';
 
 const rawBaseURL = import.meta.env.VITE_API_URL || '';
 
-// Smart Fallback Logic
+// Smart Auto-Identity Logic: Infer backend address from current frontend address
+const currentHost = window.location.hostname;
 let finalBaseURL = rawBaseURL;
 
+if (currentHost.includes('onrender.com')) {
+  // If we are on Render, try to find the backend brother service
+  // e.g. if we are on sathwik-slms-frontend.onrender.com, use sathwik-slms-backend.onrender.com
+  const baseName = currentHost.split('.')[0].replace('-frontend', '');
+  finalBaseURL = `https://${baseName}-backend.onrender.com`;
+  console.log("Auto-Identity Inferred API URL:", finalBaseURL);
+} 
+
 if (!finalBaseURL) {
-  // If no env var, try to infer from current URL
-  // Example: if frontend is slms-frontend.onrender.com, try slms-backend.onrender.com
-  const currentHost = window.location.hostname;
-  if (currentHost.includes('onrender.com')) {
-    const baseName = currentHost.split('.')[0].replace('-frontend', '');
-    finalBaseURL = `https://${baseName}-backend.onrender.com`;
-    console.log("Inferring API URL:", finalBaseURL);
-  } else {
-    finalBaseURL = 'http://localhost:8080';
-  }
+  finalBaseURL = 'http://localhost:8080';
 }
 
 // Ensure protocol and remove trailing slash

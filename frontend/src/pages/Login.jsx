@@ -52,8 +52,8 @@ export const Login = () => {
         
         <div style={{ marginTop: '30px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '16px', wordBreak: 'break-all' }}>
            <p><strong>🛠️ Debug Connection:</strong></p>
-           <p>API Endpoint: <code style={{ color: 'var(--primary)' }}>{getBaseURL()}/auth/login</code></p>
-           <p>Build Time: {new Date().toLocaleString()}</p>
+           <p>Intended API Path: <code style={{ color: 'var(--primary)' }}>{getBaseURL()}/api/auth/login</code></p>
+           <p>Host Identity: {window.location.hostname}</p>
         </div>
 
         <div style={{ marginTop: '20px', fontSize: '13px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
