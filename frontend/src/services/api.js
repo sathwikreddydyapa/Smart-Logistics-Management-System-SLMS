@@ -1,20 +1,13 @@
 import axios from 'axios';
 
-const rawBaseURL = import.meta.env.VITE_API_URL || '';
+const rawBaseURL = import.meta.env.VITE_API_URL || 'https://smart-logistics-management-system-slms-2.onrender.com';
 
-// Smart Case Logic:
+// Direct Override for SLMS production
 let finalBaseURL = rawBaseURL;
 
-if (!finalBaseURL) {
-  const currentHost = window.location.hostname;
-  if (currentHost.includes('onrender.com')) {
-    // Inference Fallback
-    const baseName = currentHost.split('.')[0].replace('-frontend', '');
-    finalBaseURL = `https://${baseName}-backend.onrender.com`;
-    console.log("Auto-Identity Fallback Inferred:", finalBaseURL);
-  } else {
-    finalBaseURL = 'http://localhost:8080';
-  }
+if (window.location.hostname.includes('onrender.com')) {
+  // Always prioritize the confirmed backend URL provided by the user
+  finalBaseURL = 'https://smart-logistics-management-system-slms-2.onrender.com';
 }
 
 // Ensure protocol and remove trailing slash
