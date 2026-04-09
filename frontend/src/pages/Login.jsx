@@ -51,9 +51,10 @@ export const Login = () => {
         </p>
         
         <div style={{ marginTop: '30px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '16px', wordBreak: 'break-all' }}>
-           <p><strong>🛠️ Debug Connection:</strong></p>
-           <p>Intended API Path: <code style={{ color: 'var(--primary)' }}>{getBaseURL()}/api/auth/login</code></p>
-           <p>Host Identity: {window.location.hostname}</p>
+          <p><strong>🛠️ Debug Connection:</strong></p>
+          <p>VITE_API_URL: <code style={{ color: 'var(--primary)' }}>{import.meta.env.VITE_API_URL || 'NONE'}</code></p>
+          <p>Final Endpoint: <code style={{ color: 'var(--primary)' }}>{getBaseURL()}/api/auth/login</code></p>
+          <p>Identity: {window.location.hostname}</p>
         </div>
 
         <div style={{ marginTop: '20px', fontSize: '13px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
