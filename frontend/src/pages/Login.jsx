@@ -8,21 +8,31 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { loginUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    console.log("🚀 Login Attempt Started for:", email);
+    
     try {
       const user = await login(email, password);
+      console.log("✅ Login Successful, User Role:", user.role);
       loginUser(user);
+      
       if (user.role === 'admin') navigate('/admin');
       else if (user.role === 'driver') navigate('/driver');
       else navigate('/customer');
     } catch (err) {
+      console.error("❌ Login Failed:", err.message);
       setError(err.message === 'Authentication error' 
         ? "Invalid credentials or account does not exist. Please try again or sign up." 
         : err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,7 +53,9 @@ export const Login = () => {
             <label className="input-label">Password</label>
             <input type="password" required className="input-field" value={password} onChange={e => setPassword(e.target.value)} />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }}>Sign In</button>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={loading}>
+            {loading ? 'Connecting...' : 'Sign In'}
+          </button>
         </form>
         
         <p style={{ marginTop: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
