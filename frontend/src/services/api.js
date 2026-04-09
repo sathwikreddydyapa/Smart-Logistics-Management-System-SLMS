@@ -1,19 +1,30 @@
 import axios from 'axios';
 
-const rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const rawBaseURL = import.meta.env.VITE_API_URL || '';
 
-// Robust logic: Ensure protocol (https://) and suffix (/api) are present
+// Smart Fallback Logic
 let finalBaseURL = rawBaseURL;
 
+if (!finalBaseURL) {
+  // If no env var, try to infer from current URL
+  // Example: if frontend is slms-frontend.onrender.com, try slms-backend.onrender.com
+  const currentHost = window.location.hostname;
+  if (currentHost.includes('onrender.com')) {
+    const baseName = currentHost.split('.')[0].replace('-frontend', '');
+    finalBaseURL = `https://${baseName}-backend.onrender.com/api`;
+    console.log("Inferring API URL:", finalBaseURL);
+  } else {
+    finalBaseURL = 'http://localhost:8080/api';
+  }
+}
+
+// Ensure protocol and suffix
 if (!finalBaseURL.startsWith('http')) {
   finalBaseURL = `https://${finalBaseURL}`;
 }
 
-if (!finalBaseURL.endsWith('/api')) {
-  // Only add /api if it doesn't already look like specialized URL
-  if (!finalBaseURL.includes('/api/')) {
-    finalBaseURL = finalBaseURL.replace(/\/$/, '') + '/api';
-  }
+if (!finalBaseURL.endsWith('/api') && !finalBaseURL.includes('/api/')) {
+  finalBaseURL = finalBaseURL.replace(/\/$/, '') + '/api';
 }
 
 const api = axios.create({
