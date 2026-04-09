@@ -11,21 +11,20 @@ if (!finalBaseURL) {
   const currentHost = window.location.hostname;
   if (currentHost.includes('onrender.com')) {
     const baseName = currentHost.split('.')[0].replace('-frontend', '');
-    finalBaseURL = `https://${baseName}-backend.onrender.com/api`;
+    finalBaseURL = `https://${baseName}-backend.onrender.com`;
     console.log("Inferring API URL:", finalBaseURL);
   } else {
-    finalBaseURL = 'http://localhost:8080/api';
+    finalBaseURL = 'http://localhost:8080';
   }
 }
 
-// Ensure protocol and suffix
+// Ensure protocol
 if (!finalBaseURL.startsWith('http')) {
   finalBaseURL = `https://${finalBaseURL}`;
 }
 
-if (!finalBaseURL.endsWith('/api') && !finalBaseURL.includes('/api/')) {
-  finalBaseURL = finalBaseURL.replace(/\/$/, '') + '/api';
-}
+// Remove trailing slash if any
+finalBaseURL = finalBaseURL.replace(/\/$/, '');
 
 const api = axios.create({
   baseURL: finalBaseURL,

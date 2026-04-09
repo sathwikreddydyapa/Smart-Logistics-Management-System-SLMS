@@ -2,7 +2,7 @@ import api from './api';
 
 export const login = async (email, password) => {
   try {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('/api/auth/login', { email, password });
     return response.data;
   } catch (error) {
     console.error("Login API Error:", error.response || error.message);
@@ -15,7 +15,7 @@ export const login = async (email, password) => {
 
 export const register = async (name, email, password, role = 'customer') => {
   try {
-    await api.post('/auth/register', { name, email, password, role });
+    await api.post('/api/auth/register', { name, email, password, role });
     // After registration, directly attempt login.
     return await login(email, password);
   } catch (error) {
