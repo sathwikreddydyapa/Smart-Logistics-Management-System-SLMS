@@ -56,6 +56,11 @@ public class ShipmentController {
         // Startup Logic: Generate ETA (Now + 4 Days)
         shipment.setEstimatedDeliveryTime(java.time.LocalDateTime.now().plusDays(4));
         
+        // Handle pre-assigned driver from customer selection
+        if (shipment.getAssignedDriverId() != null) {
+            shipment.setStatus("Picked Up"); // Immediate action status
+        }
+
         Shipment savedShipment = shipmentRepository.save(shipment);
         return ResponseEntity.ok(savedShipment);
     }
@@ -95,6 +100,32 @@ public class ShipmentController {
     @GetMapping("/drivers")
     public ResponseEntity<?> getAllDrivers() {
         return ResponseEntity.ok(userRepository.findByRole("driver"));
+    }
+
+    @GetMapping("/drivers/nearby")
+    public ResponseEntity<?> getNearbyDrivers(@RequestParam(required = false) String location) {
+        java.util.List<com.slms.backend.entity.User> drivers = userRepository.findByRole("driver");
+        
+        if (location != null && !location.isEmpty()) {
+            String locLower = location.toLowerCase();
+            java.util.List<com.slms.backend.entity.User> nearby = drivers.stream()
+                .filter(d -> d.getAddress() != null && d.getAddress().toLowerCase().contains(locLower))
+                .collect(java.util.stream.Collectors.toList());
+            
+            if (!nearby.isEmpty()) return ResponseEntity.ok(nearby);
+        }
+        
+        // Fallback: 5 least busy drivers
+        return ResponseEntity.ok(drivers.stream()
+            .sorted((d1, d2) -> {
+                long w1 = shipmentRepository.findByAssignedDriverId(d1.getId()).stream()
+                    .filter(s -> !"Delivered".equals(s.getStatus())).count();
+                long w2 = shipmentRepository.findByAssignedDriverId(d2.getId()).stream()
+                    .filter(s -> !"Delivered".equals(s.getStatus())).count();
+                return Long.compare(w1, w2);
+            })
+            .limit(5)
+            .collect(java.util.stream.Collectors.toList()));
     }
 
     @GetMapping("/recommend-driver/{id}")

@@ -29,6 +29,13 @@ export const AdminDashboard = () => {
 
   useEffect(() => {
     fetchData();
+    
+    // Automatic Background Sync every 10 seconds
+    const interval = setInterval(() => {
+      fetchData();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleAssignDriver = async (shipmentId, driverId) => {

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { Topbar } from '../components/Topbar';
 import { useAuth } from '../contexts/AuthContext';
-import { getShipments, createShipment } from '../services/shipments';
-import { Package, Truck, CheckCircle, Clock, Plus, MapPin } from 'lucide-react';
+import { getShipments, createShipment, getNearbyDrivers } from '../services/shipments';
+import { Package, Truck, CheckCircle, Clock, Plus, MapPin, Sparkles, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const CustomerDashboard = () => {
   const { user } = useAuth();
@@ -15,8 +16,11 @@ export const CustomerDashboard = () => {
   const [formData, setFormData] = useState({
     pickup_location: '',
     drop_location: '',
-    package_details: ''
+    package_details: '',
+    assignedDriverId: null
   });
+  const [nearbyDrivers, setNearbyDrivers] = useState([]);
+  const [isSearchingDrivers, setIsSearchingDrivers] = useState(false);
 
   const fetchShipments = React.useCallback(async () => {
     setLoading(true);
@@ -29,12 +33,50 @@ export const CustomerDashboard = () => {
     fetchShipments();
   }, [fetchShipments]);
 
+  useEffect(() => {
+    const searchDrivers = async () => {
+      if (formData.pickup_location.length > 3) {
+        setIsSearchingDrivers(true);
+        try {
+          const drivers = await getNearbyDrivers(formData.pickup_location);
+          setNearbyDrivers(drivers);
+          // Auto-select the first nearby driver
+          if (drivers.length > 0) {
+            setFormData(prev => ({ ...prev, assignedDriverId: drivers[0].id }));
+          }
+        } catch (error) {
+          console.error("Failed to fetch drivers", error);
+        } finally {
+          setIsSearchingDrivers(false);
+        }
+      } else {
+        setNearbyDrivers([]);
+      }
+    };
+
+    const timer = setTimeout(searchDrivers, 800);
+    return () => clearTimeout(timer);
+  }, [formData.pickup_location]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createShipment(formData, user.id);
-    setShowForm(false);
-    setFormData({ pickup_location: '', drop_location: '', package_details: '' });
-    fetchShipments();
+    const tId = toast.loading("Connecting with your driver...");
+    try {
+      const result = await createShipment(formData, user.id);
+      const assignedDriver = nearbyDrivers.find(d => d.id === formData.assignedDriverId);
+      
+      setShowForm(false);
+      setFormData({ pickup_location: '', drop_location: '', package_details: '', assignedDriverId: null });
+      fetchShipments();
+      
+      if (assignedDriver) {
+        toast.success(`🚀 Order taken by ${assignedDriver.name}!`, { id: tId, duration: 5000 });
+      } else {
+        toast.success("Shipment created successfully!", { id: tId });
+      }
+    } catch {
+      toast.error("Failed to create shipment", { id: tId });
+    }
   };
 
   const stats = {
@@ -131,8 +173,57 @@ export const CustomerDashboard = () => {
                     <input required className="input-field" style={{ paddingLeft: '44px', width: '100%' }} placeholder="e.g. Electronics (10kg)" value={formData.package_details} onChange={e => setFormData({...formData, package_details: e.target.value})} />
                  </div>
                </div>
+
+               {/* Nearby Drivers UI */}
+               <div style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <div className="flex-between" style={{ marginBottom: '16px' }}>
+                     <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                        <Sparkles size={16} color="var(--primary)" /> 
+                        {isSearchingDrivers ? "Scrutinizing Nearby Fleet..." : "Available Logistics Heroes"}
+                     </h4>
+                     {nearbyDrivers.length > 0 && <span style={{ fontSize: '12px', color: 'var(--success)' }}>{nearbyDrivers.length} Found Nearby</span>}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
+                     {nearbyDrivers.length === 0 ? (
+                        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Enter a pickup location to see nearby delivery persons.</p>
+                     ) : (
+                        nearbyDrivers.map(driver => (
+                           <div 
+                              key={driver.id} 
+                              onClick={() => setFormData({...formData, assignedDriverId: driver.id})}
+                              style={{ 
+                                 minWidth: '200px', 
+                                 padding: '12px', 
+                                 borderRadius: '10px', 
+                                 border: `2px solid ${formData.assignedDriverId === driver.id ? 'var(--primary)' : 'transparent'}`,
+                                 background: formData.assignedDriverId === driver.id ? 'rgba(124, 58, 237, 0.1)' : 'rgba(0,0,0,0.2)',
+                                 cursor: 'pointer',
+                                 transition: 'all 0.2s ease',
+                                 position: 'relative'
+                              }}
+                           >
+                              {formData.assignedDriverId === driver.id && (
+                                 <div style={{ position: 'absolute', top: '8px', right: '8px', background: 'var(--primary)', borderRadius: '50%', padding: '2px' }}>
+                                    <Check size={10} color="white" />
+                                 </div>
+                              )}
+                              <p style={{ fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{driver.name}</p>
+                              <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{driver.address || 'Verified Active'}</p>
+                           </div>
+                        ))
+                     )}
+                  </div>
+               </div>
+
                <div style={{ gridColumn: '1 / -1', marginTop: '8px' }}>
-                 <button className="btn btn-primary" type="submit" style={{ width: '100%', padding: '16px', fontSize: '16px' }}>Instantly Create Shipment</button>
+                 <button 
+                  className="btn btn-primary" 
+                  type="submit" 
+                  style={{ width: '100%', padding: '16px', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                >
+                  Confirm & Match with Hero
+                </button>
                </div>
             </form>
           </div>

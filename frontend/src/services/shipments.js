@@ -43,6 +43,11 @@ export const getAllDrivers = async () => {
   return res.data;
 };
 
+export const getNearbyDrivers = async (location) => {
+  const res = await api.get('/shipments/drivers/nearby', { params: { location } });
+  return res.data;
+};
+
 export const recommendDriver = async (shipmentId) => {
   const res = await api.get(`/shipments/recommend-driver/${shipmentId}`);
   return res.data;
