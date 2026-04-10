@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { Topbar } from '../components/Topbar';
-import { getShipments, getAllDrivers, assignDriver, recommendDriver } from '../services/shipments';
-import { Package, Truck, CheckCircle, Clock, Sparkles } from 'lucide-react';
+import { getShipments, getAllDrivers, assignDriver, recommendDriver, resetShipments } from '../services/shipments';
+import { Package, Truck, CheckCircle, Clock, Sparkles, RefreshCcw, Trash2 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import toast from 'react-hot-toast';
 
@@ -56,6 +56,19 @@ export const AdminDashboard = () => {
     }
   };
 
+  const handleReset = async () => {
+    if (!window.confirm("Are you sure you want to PERMANENTLY reset all shipment data? This cannot be undone.")) return;
+    
+    const tId = toast.loading("Executing full system reset...");
+    try {
+      await resetShipments();
+      await fetchData();
+      toast.success("System reset complete. Data cleared.", { id: tId });
+    } catch {
+      toast.error("Reset failed. Database lock detected.", { id: tId });
+    }
+  };
+
   const stats = {
     total: shipments.length,
     pending: shipments.filter(s => s.status === 'Pending').length,
@@ -94,10 +107,24 @@ export const AdminDashboard = () => {
     return filterMatch && searchMatch;
   });
 
-  const barChartData = [
-    { day: 'Mon', count: 12 }, { day: 'Tue', count: 19 }, { day: 'Wed', count: 15 },
-    { day: 'Thu', count: 25 }, { day: 'Fri', count: 22 }, { day: 'Sat', count: 18 }, { day: 'Sun', count: 8 }
-  ];
+  const getBarChartData = () => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const data = days.map(day => ({ day, count: 0 }));
+    
+    shipments.forEach(s => {
+      const date = s.createdAt ? new Date(s.createdAt) : new Date(s.created_at);
+      if (date && !isNaN(date)) {
+         const dayName = days[date.getDay()];
+         const dayObj = data.find(d => d.day === dayName);
+         if (dayObj) dayObj.count++;
+      }
+    });
+    
+    const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return data.sort((a, b) => order.indexOf(a.day) - order.indexOf(b.day));
+  };
+
+  const barChartData = getBarChartData();
 
   return (
     <div className="dashboard-layout">
@@ -105,9 +132,24 @@ export const AdminDashboard = () => {
       <div className="main-content" style={{ padding: 0 }}>
         <Topbar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
         <div style={{ padding: '40px 60px' }}>
-        <div className="page-header">
-          <h2 className="page-title">Admin Dashboard</h2>
-          <p className="page-subtitle">Overview of global operations and active logistics</p>
+        <div className="flex-between page-header">
+          <div>
+            <h2 className="page-title">Admin Dashboard</h2>
+            <p className="page-subtitle">Overview of global operations and active logistics</p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-secondary" onClick={fetchData} title="Sync with Cloud">
+               <RefreshCcw size={18} /> Refresh
+            </button>
+            <button 
+              className="btn" 
+              onClick={handleReset} 
+              style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+              title="Reset All Data"
+            >
+               <Trash2 size={18} /> Reset Data
+            </button>
+          </div>
         </div>
 
         {/* Stats Row */}

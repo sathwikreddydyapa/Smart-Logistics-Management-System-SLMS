@@ -117,4 +117,10 @@ public class ShipmentController {
 
         return recommended != null ? ResponseEntity.ok(recommended) : ResponseEntity.notFound().build();
     }
+
+    @DeleteMapping("/reset")
+    public ResponseEntity<?> resetAllShipments() {
+        shipmentRepository.deleteAll();
+        return ResponseEntity.ok(Map.of("message", "All shipments have been reset successfully"));
+    }
 }

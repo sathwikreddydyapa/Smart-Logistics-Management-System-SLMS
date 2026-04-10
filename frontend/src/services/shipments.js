@@ -47,3 +47,8 @@ export const recommendDriver = async (shipmentId) => {
   const res = await api.get(`/shipments/recommend-driver/${shipmentId}`);
   return res.data;
 };
+
+export const resetShipments = async () => {
+  const res = await api.delete('/shipments/reset');
+  return res.data;
+};
